@@ -28,8 +28,10 @@ sub startup
     $self->routes->get("/@{[ $root->basename ]}/*x" => sub {
       my($c) = @_;
 
-      my $dir = $archive->subdir($c->req->url->path);
+      my $path = $c->req->url->path;
+      my $dir = $archive->subdir($path);
       return $c->reply->not_found unless -d $dir;
+      return $c->redirect_to("$path/") unless $path->trailing_slash;
 
       $c->res->headers->content_type('text/plain');
       $c->render(
