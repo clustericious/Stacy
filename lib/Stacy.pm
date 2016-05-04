@@ -42,7 +42,7 @@ sub startup
               $stat->[3],
               $stat->[7],
               $stat->[9],
-              "$_"
+              $_->basename
           } $dir->children) . "\n",
         code => 200,
       );
