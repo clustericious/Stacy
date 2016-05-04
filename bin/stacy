@@ -1,0 +1,12 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Clustericious::Commands;
+
+# PODNAME: stacy
+# ABSTRACT: Static listing server
+# VERSION
+
+$ENV{MOJO_APP} ||= 'Stacy';
+Clustericious::Commands->start;
