@@ -25,15 +25,19 @@ sub startup
   foreach my $root ($archive->children)
   {
     next unless $root->basename =~ /^f[0-9]+$/;
-    $self->routes->get("/@{[ $root->basename ]}/*x" => sub {
+    $self->routes->get("/@{[ $root->basename ]}/failed/:pge/:pgeid/*x" => [ pgeid => qr/[0-9]+/ ] => { x => '' } => sub {
       my($c) = @_;
 
-      my $path = $c->req->url->path;
+      my $url_path = $c->req->url->path;;
+      my $dist_path = $url_path->clone;
       return $c->render( text => '403 Forbidden', status => 403 )
-        if grep /^\.{1,3}$/, @{ $path->parts };
-      my $dir = $archive->subdir($path);
+        if grep /^\.{1,3}$/, @{ $dist_path->parts };
+
+      $dist_path->parts->[2] =~ s/^/PGE_/;
+      
+      my $dir = $archive->subdir($dist_path);
       return $c->reply->not_found unless -d $dir;
-      return $c->redirect_to("$path/") unless $path->trailing_slash;
+      return $c->redirect_to("$url_path/") unless $dist_path->trailing_slash;
 
       $c->res->headers->content_type('text/plain');
       $c->render(
@@ -51,7 +55,7 @@ sub startup
         status => 200,
       );
 
-    });
+    } => 'failed_index');
   }
 
 }

@@ -13,14 +13,24 @@ $cluster->create_cluster_ok(qw( Stacy ));
 my $t = $cluster->t;
 
 subtest redirect => sub {
-  $t->get_ok("/f101/something")
-    ->status_is(302);
-  my $location = Mojo::URL->new($t->tx->res->headers->location);  
-  is $location->path, "/f101/something/", "location path = /f101/something/";
+
+  subtest main => sub {
+    $t->get_ok("/f403/failed/NMAERUV/17083998")
+      ->status_is(302);
+    my $location = Mojo::URL->new($t->tx->res->headers->location);  
+    is $location->path, "/f403/failed/NMAERUV/17083998/", "location path = /f403/failed/NMAERUV/17083998/";
+  };
+
+  subtest sub => sub {
+    $t->get_ok("/f403/failed/NMAERUV/17083998/bar")
+      ->status_is(302);
+    my $location = Mojo::URL->new($t->tx->res->headers->location);  
+    is $location->path, "/f403/failed/NMAERUV/17083998/bar/", "location path = /f403/failed/NMAERUV/17083998/bar/";
+  };
 };
 
-subtest listing => sub {
-  $t->get_ok("/f101/something/")
+subtest 'main listing' => sub {
+  $t->get_ok("/f403/failed/NMAERUV/17083998/")
     ->status_is(200);
 
   note $t->tx->res->body;
@@ -33,18 +43,33 @@ subtest listing => sub {
   is   $lines[4], undef, 'exactly the right number of lines';
 };
 
+subtest 'subdirectory listing' => sub {
+  $t->get_ok("/f403/failed/NMAERUV/17083998/bar/")
+    ->status_is(200);
+  
+  note $t->tx->res->body;
+  
+  my @lines = split /\n/, $t->tx->res->body;
+
+  like $lines[0], qr{^dr-x [0-9]+ [0-9]+ [0-9]+ \.$}, "first line current directory (.)";
+  like $lines[1], qr{^dr-x [0-9]+ [0-9]+ [0-9]+ \.\.$}, "second line parent directory (..)";
+  like $lines[2], qr{^-r-- [0-9]+ 27 [0-9]+ baz.txt$}, "forth line baz.txt";
+  is   $lines[3], undef, 'exactly the right number of lines';
+  
+};
+
 subtest file => sub {
-  $t->get_ok('/f101/something/foo.txt')
+  $t->get_ok('/f403/failed/NMAERUV/17083998/foo.txt')
     ->status_is(404);
 };
 
 subtest bogus => sub {
-  $t->get_ok('/f101/something/bogus.txt')
+  $t->get_ok('/f403/failed/NMAERUV/17083998/bogus.txt')
     ->status_is(404);
 };
 
 subtest "parent hack" => sub {
-  foreach my $path (qw( /f101/something/../ /f101/something/.. /f101/something/./ /f101/something/. /f101/something/.../ /f101/something/... ))
+  foreach my $path (qw( /f403/failed/NMAERUV/17083998/../ /f403/failed/NMAERUV/17083998/.. /f403/failed/NMAERUV/17083998/./ /f403/failed/NMAERUV/17083998/. /f403/failed/NMAERUV/17083998/.../ /f403/failed/NMAERUV/17083998/... ))
   {
     $t->get_ok($path)
       ->status_is(403);
