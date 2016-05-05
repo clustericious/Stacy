@@ -2,5 +2,8 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.03      2016-05-05 16:45:47 -0400
+  - Add PGE_ prefix which exists in file system, but not in URLs
+
 0.02      2016-05-05 06:00:33 -0400
   - initial version
