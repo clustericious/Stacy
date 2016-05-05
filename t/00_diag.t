@@ -12,8 +12,10 @@ my $post_diag;
 $modules{$_} = $_ for qw(
   Clustericious
   ExtUtils::MakeMaker
+  Log::Log4perl::CommandLine
   Path::Class
   Test::More
+  Test::Script
 );
 
 

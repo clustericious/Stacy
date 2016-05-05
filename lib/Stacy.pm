@@ -29,6 +29,8 @@ sub startup
       my($c) = @_;
 
       my $path = $c->req->url->path;
+      return $c->render( text => '403 Forbidden', status => 403 )
+        if grep /^\.{1,3}$/, @{ $path->parts };
       my $dir = $archive->subdir($path);
       return $c->reply->not_found unless -d $dir;
       return $c->redirect_to("$path/") unless $path->trailing_slash;
@@ -45,8 +47,8 @@ sub startup
               $stat->[7],
               $stat->[9],
               $_->basename
-          } $dir->children) . "\n",
-        code => 200,
+          } sort { $a->basename cmp $b->basename } $dir->children(all => 1)),
+        status => 200,
       );
 
     });
