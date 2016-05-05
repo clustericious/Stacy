@@ -14,6 +14,7 @@ $modules{$_} = $_ for qw(
   ExtUtils::MakeMaker
   Log::Log4perl::CommandLine
   Path::Class
+  Test::Clustericious::Cluster
   Test::More
   Test::Script
 );
