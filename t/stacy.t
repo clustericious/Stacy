@@ -16,16 +16,16 @@ subtest redirect => sub {
 
   subtest main => sub {
     $t->get_ok("/f403/failed/NMAERUV/17083998")
-      ->status_is(302);
-    my $location = Mojo::URL->new($t->tx->res->headers->location);  
-    is $location->path, "/f403/failed/NMAERUV/17083998/", "location path = /f403/failed/NMAERUV/17083998/";
+      ->status_is(301);
+    my $location = $t->tx->res->headers->location;
+    is $location, "/f403/failed/NMAERUV/17083998/", "location path = /f403/failed/NMAERUV/17083998/";
   };
 
   subtest sub => sub {
     $t->get_ok("/f403/failed/NMAERUV/17083998/bar")
-      ->status_is(302);
-    my $location = Mojo::URL->new($t->tx->res->headers->location);  
-    is $location->path, "/f403/failed/NMAERUV/17083998/bar/", "location path = /f403/failed/NMAERUV/17083998/bar/";
+      ->status_is(301);
+    my $location = $t->tx->res->headers->location;
+    is $location, "/f403/failed/NMAERUV/17083998/bar/", "location path = /f403/failed/NMAERUV/17083998/bar/";
   };
 };
 

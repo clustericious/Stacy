@@ -28,7 +28,7 @@ sub startup
     $self->routes->get("/@{[ $root->basename ]}/failed/:pge/:pgeid/*x" => [ pgeid => qr/[0-9]+/ ] => { x => '' } => sub {
       my($c) = @_;
 
-      my $url_path = $c->req->url->path;;
+      my $url_path = $c->req->url->path;
       my $dist_path = $url_path->clone;
       return $c->render( text => '403 Forbidden', status => 403 )
         if grep /^\.{1,3}$/, @{ $dist_path->parts };
@@ -37,7 +37,12 @@ sub startup
       
       my $dir = $archive->subdir($dist_path);
       return $c->reply->not_found unless -d $dir;
-      return $c->redirect_to("$url_path/") unless $dist_path->trailing_slash;
+      
+      unless($dist_path->trailing_slash)
+      {
+        $c->tx->res->headers->location($url_path . '/');
+        return $c->rendered(301);
+      }
 
       $c->res->headers->content_type('text/plain');
       $c->render(
