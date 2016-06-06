@@ -2,6 +2,9 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
 
+0.05      2016-06-06 10:19:23 -0400
+  - Serve actual files in addition to index
+
 0.04      2016-05-16 13:30:47 -0400
 
 0.03      2016-05-05 16:45:47 -0400
