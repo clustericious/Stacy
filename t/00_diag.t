@@ -13,6 +13,7 @@ $modules{$_} = $_ for qw(
   Clustericious
   ExtUtils::MakeMaker
   Log::Log4perl::CommandLine
+  Mojolicious::Plugin::RenderFile
   Path::Class
   Test::Clustericious::Cluster
   Test::More
