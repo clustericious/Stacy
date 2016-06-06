@@ -60,7 +60,8 @@ subtest 'subdirectory listing' => sub {
 
 subtest file => sub {
   $t->get_ok('/f403/failed/NMAERUV/17083998/foo.txt')
-    ->status_is(404);
+    ->status_is(200)
+    ->content_is("this is a text file\n");
 };
 
 subtest bogus => sub {

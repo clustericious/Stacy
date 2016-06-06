@@ -14,6 +14,7 @@ sub startup
   my $self = shift;
   $self->SUPER::startup(@_);
   $self->secrets([rand]);
+  $self->plugin('RenderFile');
 
   unless(defined $ENV{SIPSROOT})
   {
@@ -30,35 +31,47 @@ sub startup
 
       my $url_path = $c->req->url->path;
       my $dist_path = $url_path->clone;
+
       return $c->render( text => '403 Forbidden', status => 403 )
         if grep /^\.{1,3}$/, @{ $dist_path->parts };
 
       $dist_path->parts->[2] =~ s/^/PGE_/;
       
-      my $dir = $archive->subdir($dist_path);
-      return $c->reply->not_found unless -d $dir;
-      
-      unless($dist_path->trailing_slash)
-      {
-        $c->tx->res->headers->location($url_path . '/');
-        return $c->rendered(301);
-      }
+      my $dir  = $archive->subdir($dist_path);
+      my $file = $archive->subdir($dist_path);
 
-      $c->res->headers->content_type('text/plain');
-      $c->render(
-        text => join("\n",
-          map {
-            my $stat = $_->stat;
-            my $mode = $stat->[2];
-            join ' ',
-              ($_->is_dir ? 'd' : '-') . ($mode & 04 ? 'r' : '-') . ($mode & 02 ? 'w' : '-') . ($mode & 01 ? 'x' : '-'),
-              $stat->[3],
-              $stat->[7],
-              $stat->[9],
-              $_->basename
-          } sort { $a->basename cmp $b->basename } $dir->children(all => 1)),
-        status => 200,
-      );
+      if(-d $dir)
+      {
+        unless($dist_path->trailing_slash)
+        {
+          $c->tx->res->headers->location($url_path . '/');
+          return $c->rendered(301);
+        }
+
+        $c->res->headers->content_type('text/plain');
+        $c->render(
+          text => join("\n",
+            map {
+              my $stat = $_->stat;
+              my $mode = $stat->[2];
+              join ' ',
+                ($_->is_dir ? 'd' : '-') . ($mode & 04 ? 'r' : '-') . ($mode & 02 ? 'w' : '-') . ($mode & 01 ? 'x' : '-'),
+                $stat->[3],
+                $stat->[7],
+                $stat->[9],
+                $_->basename
+            } sort { $a->basename cmp $b->basename } $dir->children(all => 1)),
+          status => 200,
+        );
+      }
+      elsif(-f $file)
+      {
+        $c->render_file(filepath => "$file", filename => $file->basename);
+      }
+      else
+      {
+        $c->reply->not_found;
+      }
 
     } => 'failed_index');
   }
